@@ -13,8 +13,13 @@ scatterplotdata = processing.generateScatterplotdata(processing.data)
 problemNames = barchartdata["Problem"].unique()
 scatterplot = processing.createScatterplot(scatterplotdata)
 
-
-
+resultants = []
+indices = []
+paragraphs = [html.H3("Anomalous cases to investigate")]
+with open('./anomalies.txt', 'r') as f:
+    lines = f.readlines()
+    for line in lines:
+        paragraphs.append(html.P(children=line))
 # we create all the elements and put them in a list
 # then we simply set the children attribute of the app.layout div to be elements
 # this allows us to construct elements bit by bit, without making app layout wildly messy
@@ -41,6 +46,7 @@ elements.append(dcc.Dropdown(boxplotdata["Parameters"].unique(), 'random01.param
 elements.append(dcc.Dropdown(boxplotdata["Solver"].unique(), 'lingeling', id='solverDropdown'))
 
 elements.append(dcc.Graph(id="boxPlot", style=page.barChartStyle))
+elements.append(html.Section(children=paragraphs))
 # a footer section
 elements.append(html.Section(
     children=[html.P(["A Vertically Integrated Project by Samvit Nagpal, University of St Andrews, 2024", html.Br(),
