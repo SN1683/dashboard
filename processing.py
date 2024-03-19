@@ -1,7 +1,8 @@
 import pandas as pd
-import plotly_express as px
 import plotly.graph_objects as go
-
+import plotly_express as px
+from dash import dcc, html
+import styles as page
 def generateBoxplotdata(data):
     boxplotdata = data.copy(deep=True)
     # get rid of all the rows which do not refer to time
@@ -21,8 +22,9 @@ def generateScatterplotdata(data):
             (scatterplotdata.Options != "SavileRowTotalTime") & (scatterplotdata.Options != "SolverTotalTime")].index)
     # we dropped the same rows as above
     # but this time we take the mean time for each problem across all parameters
-    scatterplotdata = scatterplotdata.groupby(['Problem', 'Solver'])[
-        'Time'].mean().reset_index(name="Total Solution Time")
+    # scatterplotdata = scatterplotdata.groupby(['Problem', 'Solver'])[
+    #     'Time'].mean().reset_index(name="Total Solution Time")
+
     return scatterplotdata
 
 
@@ -54,7 +56,22 @@ def createScatterplot(data):
     )
     return scatterplot
 
+def generateScatterplot(elements, scatterplotdata):
+    # added a scatterplot to display performance across all problems at once
+    elements.append(html.H4(children="Select problem class"))
+    elements.append(dcc.Dropdown(scatterplotdata["Problem"].unique(), 'csplib-prob001', id='scatterproblemDropdown'))
+    elements.append(html.H4(children="Select model for x axis configuration"))
+    elements.append(dcc.Dropdown(scatterplotdata["Model"].unique(), 'model.eprime', id='scattermodelDropdown1'))
+    elements.append(html.H4(children="Select solver for x axis configuration"))
+    elements.append(dcc.Dropdown(scatterplotdata["Solver"].unique(), 'lingeling', id='scattersolverDropdown1'))
+    elements.append(html.H4(children="Select model for y axis configuration"))
+    elements.append(dcc.Dropdown(scatterplotdata["Model"].unique(), 'model.eprime', id='scattermodelDropdown2'))
+    elements.append(html.H4(children="Select solver for y axis configuration"))
+    elements.append(dcc.Dropdown(scatterplotdata["Solver"].unique(), 'lingeling', id='scattersolverDropdown2'))
+    elements.append(html.H4(children="Select what output you want plotted"))
+    elements.append(dcc.Dropdown(scatterplotdata["Options"].unique(), 'SavileRowTotalTime', id='scattertimeDropdown'))
 
+    elements.append(dcc.Graph(id="scatterplot", style=page.scatterplotstyle))
 FILEPATH = "./infos.tsv"
 LINE_TERMINATOR = '\n'
 SEPARATOR = '\s+'
