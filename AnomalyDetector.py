@@ -45,8 +45,8 @@ def generateDataFrame(directory, featuresdata):
 def runModels(anomalyData):
     anomalousValues = anomalyData.copy(deep=True)
     # with standard hyperparameters
-    forest = IsolationForest(n_estimators=50, max_samples='auto', contamination=float(0.1), max_features=1.0)
-    lof = LocalOutlierFactor(n_neighbors=20)
+    forest = IsolationForest(n_estimators=50, max_samples='auto', contamination=float(0.01), max_features=1.0)
+    lof = LocalOutlierFactor(n_neighbors=20, contamination=float(0.01))
     forest.fit(anomalyData)
     lof.fit(anomalyData)
     anomalousValues['scores'] = forest.decision_function(anomalyData)
@@ -73,11 +73,12 @@ def repeatAnalysis(iterations, combined, anomalyData):
         combined.drop(to_drop, axis=1, inplace=True)
     return combined
 
-
 directory = os.fsencode(DIRECTORY_NAME)
-featuresdata = pd.DataFrame()
-featuresdata = generateDataFrame(directory, featuresdata)
-result = runModels(featuresdata)
-combined = result.copy(deep=True)
-combined = repeatAnalysis(ITERATIONS, combined, featuresdata)
-print(combined)
+if __name__ == '__main__':
+    featuresdata = pd.DataFrame()
+    featuresdata = generateDataFrame(directory, featuresdata)
+    result = runModels(featuresdata)
+    combined = result.copy(deep=True)
+    combined = repeatAnalysis(ITERATIONS, combined, featuresdata)
+    print(combined)
+    combined[['d_int_vars', 'totalTime', 'savilerowInfo.SolverNodes']].to_csv('./anomalies.csv', header=['d_int_vars', 'totalTime', 'savilerowInfo.SolverNodes'], index=None, sep=',', mode='w+')
